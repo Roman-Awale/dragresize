@@ -26,23 +26,60 @@ const MyComponent: React.FC<MyComponentProps> = ({
   const [minWidth, setMinWidth] = useState<number>(200);
   const [minHeight, setMinHeight] = useState<number>(200);
   const [triggerBtnHeight, setTriggerBtnHeight] = useState<number>(0);
+  const [triggerBtnWidth, setTriggerBtnWidth] = useState<number>(0);
 
   const handleOpen = () => {
     setIsOpen(true);
+    setTriggerBtnWidth(triggerRef?.current?.clientWidth || 0);
   };
 
   const handleClose = () => {
     const transformValue = containerRef.current?.style.transform || "";
+
     const [translateX, translateY] = transformValue
       .match(/translate\(([^,]+),([^)]+)\)/)
       ?.slice(1)
       .map(parseFloat) || [0, 0];
 
+    let newTranslateX = translateX;
+    let newTranslateY = translateY;
+
+    const buttonWidth = triggerRef?.current?.clientWidth || 0;
+    const buttonHeight = triggerRef?.current?.clientHeight || 0;
+    const buttonOffsetLeft = triggerRef?.current?.offsetLeft || 0;
+    const buttonRect = triggerRef.current?.getBoundingClientRect();
+
+    const buttonOffsetHeight = buttonRect
+      ? window.innerHeight - buttonRect.bottom
+      : 0;
+
+    const draggableContainerWidth =
+      containerRef?.current?.clientWidth || minWidth;
+
+    const draggableContainerHeight =
+      containerRef?.current?.clientHeight || minHeight;
+
+    if (
+      buttonOffsetLeft < draggableContainerWidth &&
+      buttonOffsetHeight < draggableContainerHeight
+    ) {
+      newTranslateX = translateX + draggableContainerWidth + buttonWidth;
+      newTranslateY = translateY - draggableContainerHeight + buttonHeight / 2;
+    } else if (buttonOffsetLeft < draggableContainerWidth) {
+      newTranslateX = translateX + buttonWidth / 2 + draggableContainerWidth;
+    } else if (buttonOffsetHeight < draggableContainerHeight) {
+      newTranslateX = translateX;
+      newTranslateY = translateY - draggableContainerHeight + buttonHeight / 2;
+    } else {
+      newTranslateX = translateX;
+      newTranslateY = translateY + buttonHeight / 2;
+    }
+
     anime({
       targets: ".my-component .el",
-      translateX: -translateX,
-      translateY: -translateY,
+      translateX: -newTranslateX,
 
+      translateY: -newTranslateY,
       overflow: "hidden",
       minWidth: 0,
       minHeight: 0,
@@ -52,8 +89,8 @@ const MyComponent: React.FC<MyComponentProps> = ({
       easing: "easeOutQuad",
       complete: () => {
         setIsOpen(false);
-        const rect = triggerRef.current?.getBoundingClientRect();
-        if (rect) setPosition({ x: rect.left, y: rect.top });
+        // const rect = triggerRef.current?.getBoundingClientRect();
+        // if (rect) setPosition({ x: rect.left, y: rect.top });
       },
     });
   };
@@ -65,17 +102,59 @@ const MyComponent: React.FC<MyComponentProps> = ({
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const offsetLeft = 3;
 
   useEffect(() => {
     if (isOpen) {
+      const buttonWidth = triggerRef?.current?.clientWidth || 0;
+      const buttonHeight = triggerRef?.current?.clientHeight || 0;
+      const buttonOffsetLeft = triggerRef?.current?.offsetLeft || 0;
+      const buttonRect = triggerRef.current?.getBoundingClientRect();
+
+      const buttonOffsetHeight = buttonRect
+        ? window.innerHeight - buttonRect.bottom
+        : 0;
+
+      const draggableContainerWidth =
+        containerRef?.current?.clientWidth || minWidth;
+
+      const draggableContainerHeight =
+        containerRef?.current?.clientHeight || minHeight;
+
+      if (
+        buttonOffsetLeft < draggableContainerWidth &&
+        buttonOffsetHeight < draggableContainerHeight
+      ) {
+        setPosition({
+          x: buttonOffsetLeft + draggableContainerWidth + buttonWidth,
+          y:
+            window.innerHeight -
+            buttonOffsetHeight -
+            draggableContainerHeight +
+            buttonHeight,
+        });
+      } else if (buttonOffsetLeft < draggableContainerWidth) {
+        setPosition({
+          x: buttonOffsetLeft + draggableContainerWidth + buttonWidth,
+          y: triggerRef?.current?.clientHeight || 0,
+        });
+      } else if (buttonOffsetHeight < draggableContainerHeight) {
+        setPosition((prevPosition) => ({
+          ...prevPosition,
+          y:
+            window.innerHeight -
+            buttonOffsetHeight -
+            draggableContainerHeight +
+            buttonHeight,
+        }));
+      }
       anime({
         targets: ".el",
         scale: [{ value: 1, easing: "easeOutQuad", duration: 200 }],
       });
     } else if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({ x: rect.left - offsetLeft, y: rect.bottom });
+      const borderOffset = 2;
+      setPosition({ x: rect.left - borderOffset, y: rect.bottom });
 
       anime({
         targets: ".el",
@@ -113,7 +192,6 @@ const MyComponent: React.FC<MyComponentProps> = ({
           handle=".handle"
           bounds="body"
           defaultPosition={{ x: -minWidth, y: -triggerBtnHeight }}
-          nodeRef={containerRef}
         >
           <Resizable
             width={minWidth}

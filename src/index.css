@@ -22,10 +22,18 @@ code {
 }
 
 .open-btn {
-  position: relative;
+  position: absolute;
+  border: 0;
+  padding: 0.75rem 1.25rem;
+  background-color: red;
+  /* bottom: 0; */
+  /* left: 0; */
 }
 
 .el {
   transform-origin: top right;
   position: fixed;
+}
+body {
+  height: 100vh;
 }
