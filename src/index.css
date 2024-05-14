@@ -26,8 +26,9 @@ code {
   border: 0;
   padding: 0.75rem 1.25rem;
   background-color: red;
-  /* bottom: 0; */
-  /* left: 0; */
+  /* bottom: 50px; */
+  right: 50px;
+  top: 100px;
 }
 
 .el {

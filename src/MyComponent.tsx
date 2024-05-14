@@ -64,12 +64,15 @@ const MyComponent: React.FC<MyComponentProps> = ({
       buttonOffsetHeight < draggableContainerHeight
     ) {
       newTranslateX = translateX + draggableContainerWidth + buttonWidth;
-      newTranslateY = translateY - draggableContainerHeight + buttonHeight / 2;
+      newTranslateY =
+        translateY - draggableContainerHeight + buttonHeight / 2 + buttonHeight;
     } else if (buttonOffsetLeft < draggableContainerWidth) {
       newTranslateX = translateX + buttonWidth / 2 + draggableContainerWidth;
+      newTranslateY = translateY + buttonHeight / 2;
     } else if (buttonOffsetHeight < draggableContainerHeight) {
       newTranslateX = translateX;
-      newTranslateY = translateY - draggableContainerHeight + buttonHeight / 2;
+      newTranslateY =
+        translateY - draggableContainerHeight + buttonHeight + buttonHeight / 2;
     } else {
       newTranslateX = translateX;
       newTranslateY = translateY + buttonHeight / 2;
@@ -89,8 +92,6 @@ const MyComponent: React.FC<MyComponentProps> = ({
       easing: "easeOutQuad",
       complete: () => {
         setIsOpen(false);
-        // const rect = triggerRef.current?.getBoundingClientRect();
-        // if (rect) setPosition({ x: rect.left, y: rect.top });
       },
     });
   };
@@ -109,6 +110,7 @@ const MyComponent: React.FC<MyComponentProps> = ({
       const buttonHeight = triggerRef?.current?.clientHeight || 0;
       const buttonOffsetLeft = triggerRef?.current?.offsetLeft || 0;
       const buttonRect = triggerRef.current?.getBoundingClientRect();
+      const rect = triggerRef?.current?.getBoundingClientRect();
 
       const buttonOffsetHeight = buttonRect
         ? window.innerHeight - buttonRect.bottom
@@ -135,7 +137,7 @@ const MyComponent: React.FC<MyComponentProps> = ({
       } else if (buttonOffsetLeft < draggableContainerWidth) {
         setPosition({
           x: buttonOffsetLeft + draggableContainerWidth + buttonWidth,
-          y: triggerRef?.current?.clientHeight || 0,
+          y: rect?.bottom || 0,
         });
       } else if (buttonOffsetHeight < draggableContainerHeight) {
         setPosition((prevPosition) => ({
