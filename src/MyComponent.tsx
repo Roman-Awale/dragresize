@@ -26,11 +26,9 @@ const MyComponent: React.FC<MyComponentProps> = ({
   const [minWidth, setMinWidth] = useState<number>(200);
   const [minHeight, setMinHeight] = useState<number>(200);
   const [triggerBtnHeight, setTriggerBtnHeight] = useState<number>(0);
-  const [triggerBtnWidth, setTriggerBtnWidth] = useState<number>(0);
 
   const handleOpen = () => {
     setIsOpen(true);
-    setTriggerBtnWidth(triggerRef?.current?.clientWidth || 0);
   };
 
   const handleClose = () => {
@@ -81,7 +79,6 @@ const MyComponent: React.FC<MyComponentProps> = ({
     anime({
       targets: ".my-component .el",
       translateX: -newTranslateX,
-
       translateY: -newTranslateY,
       overflow: "hidden",
       minWidth: 0,
@@ -111,7 +108,6 @@ const MyComponent: React.FC<MyComponentProps> = ({
       const buttonOffsetLeft = triggerRef?.current?.offsetLeft || 0;
       const buttonRect = triggerRef.current?.getBoundingClientRect();
       const rect = triggerRef?.current?.getBoundingClientRect();
-
       const buttonOffsetHeight = buttonRect
         ? window.innerHeight - buttonRect.bottom
         : 0;
@@ -149,6 +145,7 @@ const MyComponent: React.FC<MyComponentProps> = ({
             buttonHeight,
         }));
       }
+
       anime({
         targets: ".el",
         scale: [{ value: 1, easing: "easeOutQuad", duration: 200 }],
@@ -164,7 +161,7 @@ const MyComponent: React.FC<MyComponentProps> = ({
         duration: 0,
       });
     }
-  }, [isOpen]);
+  }, [isOpen, minHeight, minWidth]);
 
   const containerStyles: React.CSSProperties = {
     border: "1px solid #ddd",
