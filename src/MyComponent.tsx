@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import anime from "animejs";
 import Draggable from "react-draggable";
-import { Resizable } from "react-resizable";
+
+import tabler_bulb from "./tabler_bulb.svg";
+import { FiX } from "vyaguta-icons/fi";
 
 interface MyComponentProps {
   wrapperStyles?: React.CSSProperties;
@@ -14,7 +16,6 @@ interface MyComponentProps {
 const MyComponent: React.FC<MyComponentProps> = ({
   wrapperStyles,
   triggerStyles,
-  openText = "open",
   handleStyles,
   contentWrapperStyles,
 }) => {
@@ -23,13 +24,21 @@ const MyComponent: React.FC<MyComponentProps> = ({
     x: 0,
     y: 0,
   });
-  const [minWidth, setMinWidth] = useState<number>(200);
-  const [minHeight, setMinHeight] = useState<number>(200);
+  const [size, setSize] = useState<{ width: number; height: number }>({
+    width: 200,
+    height: 200,
+  });
   const [triggerBtnHeight, setTriggerBtnHeight] = useState<number>(0);
+
+  const initialSize = useRef({ width: 200, height: 200 });
+
+  // this is to trigger the open button
 
   const handleOpen = () => {
     setIsOpen(true);
   };
+
+  // this is to trigger close button
 
   const handleClose = () => {
     const transformValue = containerRef.current?.style.transform || "";
@@ -51,11 +60,10 @@ const MyComponent: React.FC<MyComponentProps> = ({
       ? window.innerHeight - buttonRect.bottom
       : 0;
 
-    const draggableContainerWidth =
-      containerRef?.current?.clientWidth || minWidth;
+    const draggableContainerWidth = initialSize.current.width;
+    const draggableContainerHeight = initialSize.current.height;
 
-    const draggableContainerHeight =
-      containerRef?.current?.clientHeight || minHeight;
+    // this are the condition to return the initial position of component onclicking close button which is placed on different places in viewport.
 
     if (
       buttonOffsetLeft < draggableContainerWidth &&
@@ -76,6 +84,8 @@ const MyComponent: React.FC<MyComponentProps> = ({
       newTranslateY = translateY + buttonHeight / 2;
     }
 
+    // component closing animation on click close button
+
     anime({
       targets: ".my-component .el",
       translateX: -newTranslateX,
@@ -83,10 +93,13 @@ const MyComponent: React.FC<MyComponentProps> = ({
       overflow: "hidden",
       minWidth: 0,
       minHeight: 0,
-      height: 20,
-      width: 45,
+      height: 34,
+      width: 34,
+      borderRadius: "50%",
       duration: 300,
       easing: "easeOutQuad",
+      opacity: "0.1",
+
       complete: () => {
         setIsOpen(false);
       },
@@ -112,11 +125,10 @@ const MyComponent: React.FC<MyComponentProps> = ({
         ? window.innerHeight - buttonRect.bottom
         : 0;
 
-      const draggableContainerWidth =
-        containerRef?.current?.clientWidth || minWidth;
+      const draggableContainerWidth = initialSize.current.width;
+      const draggableContainerHeight = initialSize.current.height;
 
-      const draggableContainerHeight =
-        containerRef?.current?.clientHeight || minHeight;
+      // this are the condition to setting initial position of component while placing open button through different places.
 
       if (
         buttonOffsetLeft < draggableContainerWidth &&
@@ -152,7 +164,7 @@ const MyComponent: React.FC<MyComponentProps> = ({
       });
     } else if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const borderOffset = 2;
+      const borderOffset = 5;
       setPosition({ x: rect.left - borderOffset, y: rect.bottom });
 
       anime({
@@ -161,16 +173,20 @@ const MyComponent: React.FC<MyComponentProps> = ({
         duration: 0,
       });
     }
-  }, [isOpen, minHeight, minWidth]);
+  }, [isOpen]);
+
+  // styling of component container goes here...
 
   const containerStyles: React.CSSProperties = {
-    border: "1px solid #ddd",
+    border: "2px solid #102b7b",
+    background: "#f4f7f9",
+    borderRadius: "8px",
     resize: "both",
     overflow: "auto",
     transitionTimingFunction: "ease-out",
     left: position.x,
-    minWidth: minWidth,
-    minHeight: minHeight,
+    width: size.width,
+    height: size.height,
     top: position.y,
   };
 
@@ -182,7 +198,9 @@ const MyComponent: React.FC<MyComponentProps> = ({
         style={triggerStyles}
         className="open-btn"
       >
-        {openText}
+        <div className="inner-ellipse">
+          <img src={tabler_bulb} alt="tabler bulb" />
+        </div>
       </button>
 
       {isOpen && (
@@ -190,28 +208,30 @@ const MyComponent: React.FC<MyComponentProps> = ({
           axis="both"
           handle=".handle"
           bounds="body"
-          defaultPosition={{ x: -minWidth, y: -triggerBtnHeight }}
+          defaultPosition={{ x: -size.width, y: -triggerBtnHeight }}
         >
-          <Resizable
-            width={minWidth}
-            height={minHeight}
-            onResize={(e, { size }) => {
-              setMinWidth(size.width);
-              setMinHeight(size.height);
-            }}
+          <div
+            className="component-container el"
+            id="myDiv"
+            ref={containerRef}
+            style={containerStyles}
           >
-            <div
-              className="component-container el"
-              id="myDiv"
-              ref={containerRef}
-              style={containerStyles}
-            >
-              <div className="handle" style={handleStyles}>
-                <button onClick={handleClose}>close</button>
-              </div>
-              <div style={contentWrapperStyles}>{"content"}</div>
+            <div className="handle" style={handleStyles}>
+              Feedback Guidelines
+              <button onClick={handleClose}>
+                <FiX />
+              </button>
             </div>
-          </Resizable>
+            <div
+              style={{
+                ...contentWrapperStyles,
+                padding: "12px",
+                overflowWrap: "break-word",
+              }}
+            >
+              {"content"}
+            </div>
+          </div>
         </Draggable>
       )}
     </div>
